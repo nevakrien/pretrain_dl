@@ -1,19 +1,13 @@
-from datasets import load_dataset
+from datasets import load_from_disk
 from transformers import AutoTokenizer, Trainer,TrainingArguments ,DataCollatorForLanguageModeling
 from bigdl.llm.transformers import AutoModelForCausalLM#,Trainer,DataCollatorForLanguageModeling
 
 model=AutoModelForCausalLM.from_pretrained("random_bert")
 
-dataset = load_dataset('bookcorpus')
-
 model_name = "bert-base-uncased"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-def tokenize_function(examples):
-    # Replace 'text' with the correct field of your dataset
-    return tokenizer(examples["text"], padding="max_length", truncation=True, max_length=512, return_tensors="pt")
-
-tokenized_datasets = dataset.map(tokenize_function, batched=True)
+tokenized_datasets = load_from_disk('dataset')
 
 data_collator = DataCollatorForLanguageModeling(
     tokenizer=tokenizer,
@@ -35,13 +29,14 @@ training_args = TrainingArguments(
     logging_dir='./logs',
 )
 
+print(len(tokenized_datasets))
 trainer = Trainer(
     model=model,
     args=training_args,
     data_collator=data_collator,
-    train_dataset=tokenized_datasets["train"],
-    eval_dataset=tokenized_datasets["test"], # If you have a test split.
+    train_dataset=tokenized_datasets,#[100:],
+    #eval_dataset=tokenized_datasets[:100], # If you have a test split.
 )
 
 trainer.train()
-trainer.save_model("finetuned")
+trainer.save_model("pretrained")
