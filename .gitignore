@@ -1,7 +1,10 @@
+
 random_bert/
 dataset/
+dataset_val/
 pretrained/
 results/
+logs/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
