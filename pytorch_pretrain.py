@@ -1,19 +1,32 @@
+
 import torch
-#import torch.distributed as dist
+import intel_extension_for_pytorch as ipex
+import oneccl_bindings_for_pytorch
+
+import torch.distributed as dist
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
-from bigdl.llm.transformers import AutoModelForCausalLM
+from bigdl.llm.transformers import AutoModelForMaskedLM
 from datasets import load_from_disk
 from transformers import DataCollatorForLanguageModeling
+import os
 
 from tqdm import tqdm
 # Assuming the necessary imports from PyTorch and other libraries are already done
 
-device=torch.device('xpu:0')
+os.environ['MASTER_ADDR'] = 'localhost'
+os.environ['MASTER_PORT'] = '12355'
+os.environ['CCL_ZE_IPC_EXCHANGE'] = 'sockets'
+os.environ['CCL_ATL_TRANSPORT']='mpi'
+# initialize the process group
+rank=0
+dist.init_process_group("ccl", rank=rank, world_size=1)
+device=torch.device(f'xpu:{rank}')
+
 # Initialize model and tokenizer
 model_name = "bert-base-uncased"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained("random_bert").to(device)#('xpu')
+model = AutoModelForMaskedLM.from_pretrained("random_bert").to(device)#('xpu')
 
 #model= torch.nn.DataParallel(model, device_ids=[0, 1, 2,3])
 
@@ -59,6 +72,9 @@ for epoch in range(num_train_epochs):
         optimizer.step()
         optimizer.zero_grad()
 
+
+        dist.all_reduce(loss, op=dist.ReduceOp.AVG)
+
         train_loss += loss.item()
         # Format loss to display with 4 decimal places
         current_train_loss = train_loss / (tqdm_train_loader.n + 1)
@@ -73,6 +89,7 @@ for epoch in range(num_train_epochs):
             batch = {k: v.to(device) for k, v in batch.items()}
             outputs = model(**batch)
             loss = outputs.loss
+            dist.all_reduce(loss, op=dist.ReduceOp.AVG)
             total_eval_loss += loss.item()
             # Format eval loss to display with 4 decimal places
             current_eval_loss = total_eval_loss / (tqdm_eval_loader.n + 1)
