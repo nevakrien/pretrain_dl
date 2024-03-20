@@ -1,5 +1,7 @@
-import intel_extension_for_pytorch as ipex
 import torch
+import intel_extension_for_pytorch as ipex
+import oneccl_bindings_for_pytorch
+
 from datasets import load_from_disk
 from transformers import AutoTokenizer,TrainingArguments,Trainer ,DataCollatorForLanguageModeling
 from bigdl.llm.transformers import AutoModelForCausalLM#,Trainer,DataCollatorForLanguageModeling
@@ -47,6 +49,7 @@ trainer = Trainer(
     data_collator=data_collator,
     train_dataset=tokenized_datasets,#[100:],
     eval_dataset=eval_dataset,#tokenized_datasets[:100], # If you have a test split.
+    #place_model_on_device=True,
 )
 
 trainer.train()

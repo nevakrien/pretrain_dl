@@ -28,7 +28,7 @@ model_name = "bert-base-uncased"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForMaskedLM.from_pretrained("random_bert").to(device)#('xpu')
 
-#model= torch.nn.DataParallel(model, device_ids=[0, 1, 2,3])
+model= torch.nn.DataParallel(model, device_ids=[rank])#[0, 1, 2,3])
 
 # Load datasets
 train_dataset = load_from_disk('dataset')
