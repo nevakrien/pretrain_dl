@@ -1,5 +1,7 @@
-
-
+HeNLP_HeDC4_dataset/
+HeNLP_HeDC4_dataset_val/
+random_hebert/
+pretrained_hebert/
 tf_random_bert/
 random_bert/
 dataset/
