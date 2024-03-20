@@ -1,4 +1,6 @@
 
+
+tf_random_bert/
 random_bert/
 dataset/
 dataset_val/

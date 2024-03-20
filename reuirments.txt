@@ -1,3 +1,0 @@
-pip install bigdl-nano
-lightning
-pytorch_lightning

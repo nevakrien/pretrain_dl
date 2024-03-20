@@ -1,0 +1,4 @@
+pip install bigdl-nano
+lightning
+omegaconf==1.4.1
+pytorch_lightning=1.2.4
