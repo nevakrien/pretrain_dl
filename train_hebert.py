@@ -54,6 +54,6 @@ trainer = Trainer(
     #place_model_on_device=True,
 )
 
-trainer.train()
+trainer.train(resume_from_checkpoint=True)
 trainer.save_model("pretrained_hebert")
 
